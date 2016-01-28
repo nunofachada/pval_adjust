@@ -21,11 +21,21 @@ function pc = pval_adjust(p, method)
 % at http://opensource.org/licenses/MIT)
 %
 
-% What method to use?
-if strcmp(method, 'holm')
+% Number of p-values
+np = numel(p);
+
+% Method 'hommel' is equivalent to 'hochberg' of np == 2
+if (np == 2) &&  strcmp(method, 'hommel')
+    method = 'hochberg';
+end;
+
+% Just one p-value? Return it as given.
+if np <= 1
+
+    pc = p;
     
-    % Number of p-values
-    np = numel(p);
+% What method to use?
+elseif strcmp(method, 'holm')
     
     % Sort p-values from smallest to largest
     [pc, pidx] = sort(p);
@@ -40,8 +50,24 @@ if strcmp(method, 'holm')
 
 elseif strcmp(method, 'hochberg')
 
-    % Not implemented
-    error('Method not implemented');
+    % Descendent vector
+    vdec = np:-1:1;
+    
+    % Sort p-values in descending order
+    pc = sort(p, 'descend');
+    
+    % Get indexes of p-values in asceding order
+    [~, asc] = sort(p);
+    
+    % Obtain the adjusted p-values
+    pc = ((np + 1) - vdec) .* pc;
+    for i = 2:np
+        if pc(i) > pc(i - 1)
+            pc(i) = pc(i - 1);
+        end;
+    end;
+    
+    pc = pc(asc);
 
 elseif strcmp(method, 'hommel')
 

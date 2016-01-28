@@ -1,9 +1,9 @@
 ### Summary
 
 Adjust p-values for multiple comparisons. Given a set of
-p-values, returns p-values adjusted using one of several methods. This is
-an implementation of the p.adjust R function, the documentation of which
-can be found at http://www.inside-r.org/r-doc/stats/p.adjust.
+p-values, returns p-values adjusted using one of several methods. This
+is an implementation of the `p.adjust` R function, the documentation of
+which can be found at http://www.inside-r.org/r-doc/stats/p.adjust.
 
 ### Usage
 
