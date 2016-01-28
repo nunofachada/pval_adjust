@@ -54,20 +54,19 @@ elseif strcmp(method, 'hochberg')
     vdec = np:-1:1;
     
     % Sort p-values in descending order
-    pc = sort(p, 'descend');
+    [pc, pidx] = sort(p, 'descend');
     
-    % Get indexes of p-values in asceding order
-    [~, asc] = sort(p);
+    % Get indexes of p-value indexes
+    [~, ipidx] = sort(pidx);
     
-    % Obtain the adjusted p-values
+    % Hochberg-specific transformation
     pc = ((np + 1) - vdec) .* pc;
-    for i = 2:np
-        if pc(i) > pc(i - 1)
-            pc(i) = pc(i - 1);
-        end;
-    end;
+
+    % Cumulative minimum
+    pc = cmin(pc);
     
-    pc = pc(asc);
+    % Reorder p-values to original order
+    pc = pc(ipidx);
 
 elseif strcmp(method, 'hommel')
 
@@ -78,21 +77,47 @@ elseif strcmp(method, 'bonferroni')
     
     % Simple conservative Bonferroni
     pc = p * numel(p);
-    
-elseif strcmp(method, 'hochberg')
-
-    % Not implemented
-    error('Method not implemented');
 
 elseif strcmp(method, 'BH') || strcmp(method, 'fdr')
 
-    % Not implemented
-    error('Method not implemented');
+    % Descendent vector
+    vdec = np:-1:1;
+    
+    % Sort p-values in descending order
+    [pc, pidx] = sort(p, 'descend');
+
+    % Get indexes of p-value indexes
+    [~, ipidx] = sort(pidx);
+
+    % BH-specific transformation
+    pc = (np ./ vdec) .* pc;
+
+    % Cumulative minimum
+    pc = cmin(pc);    
+    
+    % Reorder p-values to original order
+    pc = pc(ipidx);
 
 elseif strcmp(method, 'BY')
 
-    % Not implemented
-    error('Method not implemented');
+    % Descendent vector
+    vdec = np:-1:1;
+    
+    % Sort p-values in descending order
+    [pc, pidx] = sort(p, 'descend');
+
+    % Get indexes of p-value indexes
+    [~, ipidx] = sort(pidx);
+
+    % BY-specific transformation
+    q = sum(1 ./ (1:np));
+    pc = (q * np ./ vdec) .* pc;
+
+    % Cumulative minimum
+    pc = cmin(pc);    
+    
+    % Reorder p-values to original order
+    pc = pc(ipidx);
 
 elseif strcmp(method, 'none')
     
@@ -109,3 +134,12 @@ end;
 % Can't have p-values larger than one
 pc(pc > 1) = 1;    
     
+% Helper function to determine the cumulative mininum
+function p = cmin(p)
+
+for i = 2:numel(p)
+    if p(i) > p(i - 1)
+        p(i) = p(i - 1);
+    end;
+end;
+
