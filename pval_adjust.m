@@ -9,12 +9,22 @@ function pc = pval_adjust(p, method)
 % Parameters:
 %        p - Numeric vector or matrix of p-values. Contrary to the R
 %            function, this function does not handle missing values.
-%   method - Correction method, one of 'holm', 'hochberg', 'hommel', 
-%            'bonferroni', 'BH', 'BY', 'fdr' or 'none'.
+%   method - Correction method, one of: 'holm', 'hochberg', 'hommel', 
+%            'bonferroni', 'BH', 'BY', 'fdr', 'sidak' or 'none'.
 %
 % Outputs:
 %       pc - A numeric vector or matrix of corrected p-values, with the
 %            same shape/dimensions of p.
+%
+% Notes:
+%
+% This function has two main differences regarding the R implementation:
+%
+%   1. Contrary to the R function, this function does not handle missing
+%      values.
+%   2. It adds one additional correction method, 'sidak', as described
+%      here: https://en.wikipedia.org/wiki/%C5%A0id%C3%A1k_correction
+%
 %
 % Copyright (c) 2016 Nuno Fachada
 % Distributed under the MIT License (See accompanying file LICENSE or copy 
@@ -145,6 +155,11 @@ elseif strcmp(method, 'BY')
     % Reorder p-values to original order
     pc = pc(ipidx);
 
+elseif strcmp(method, 'sidak')
+
+    % Sidak correction
+    pc = 1 - (1 - p) .^ np;
+    
 elseif strcmp(method, 'none')
     
     % No correction
@@ -157,11 +172,11 @@ else
     
 end;
 
-% Reshape result vector to original form
-pc = reshape(pc, pdims);
-
 % Can't have p-values larger than one
 pc(pc > 1) = 1;    
+
+% Reshape result vector to original form
+pc = reshape(pc, pdims);
     
 % Helper function to determine the cumulative minimum
 function p = cmin(p)

@@ -14,7 +14,8 @@ pc = pval_adjust([0.1 0.3 0.05 0.001 0.1 0.9 0.0004], 'bonferroni')
 
 ### Correction methods
 
-'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr' or 'none'.
+'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'sidak' or
+'none'.
 
 ### License
 
