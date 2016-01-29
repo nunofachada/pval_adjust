@@ -8,7 +8,7 @@ function pc = pval_adjust(p, method)
 %
 % Parameters:
 %        p - Numeric vector of p-values. Contrary to the R function, this
-%            function does not handle NaNs.
+%            function does not handle missing values.
 %   method - Correction method, one of 'holm', 'hochberg', 'hommel', 
 %            'bonferroni', 'BH', 'BY', 'fdr' or 'none'.
 %
@@ -70,8 +70,29 @@ elseif strcmp(method, 'hochberg')
 
 elseif strcmp(method, 'hommel')
 
-    % Not implemented
-    error('Method not implemented');
+    % Sort p-values from smallest to largest
+    [pc, pidx] = sort(p);
+    
+    % Get indexes of p-value indexes
+    [~, ipidx] = sort(pidx);
+    
+    % Generate vectors for cycle
+    pa = repmat(min(np * pc ./ (1:np)), size(p));
+    q = pa;
+    
+    % Begin cycle
+    for i = (np - 1):-1:2
+        i1 = 1:(np - i + 1);
+        i2 = (np - i + 2):np;
+        q1 = min(i * pc(i2) ./ (2:i));
+        q(i1) = min(i * pc(i1), q1);
+        q(i2) = q(np - i + 1);
+        pa = max(pa, q);
+    end;
+    
+    % Finalize result
+    pa = max(pa, pc);
+    pc = pa(ipidx);
 
 elseif strcmp(method, 'bonferroni')
     
@@ -134,7 +155,7 @@ end;
 % Can't have p-values larger than one
 pc(pc > 1) = 1;    
     
-% Helper function to determine the cumulative mininum
+% Helper function to determine the cumulative minimum
 function p = cmin(p)
 
 for i = 2:numel(p)
