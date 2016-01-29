@@ -7,14 +7,14 @@ function pc = pval_adjust(p, method)
 %   pc = PVAL_ADJUST(p, method)
 %
 % Parameters:
-%        p - Numeric vector of p-values. Contrary to the R function, this
-%            function does not handle missing values.
+%        p - Numeric vector or matrix of p-values. Contrary to the R
+%            function, this function does not handle missing values.
 %   method - Correction method, one of 'holm', 'hochberg', 'hommel', 
 %            'bonferroni', 'BH', 'BY', 'fdr' or 'none'.
 %
 % Outputs:
-%       pc - A numeric vector of corrected p-values, of the same length as
-%            p.
+%       pc - A numeric vector or matrix of corrected p-values, with the
+%            same shape/dimensions of p.
 %
 % Copyright (c) 2016 Nuno Fachada
 % Distributed under the MIT License (See accompanying file LICENSE or copy 
@@ -23,6 +23,11 @@ function pc = pval_adjust(p, method)
 
 % Number of p-values
 np = numel(p);
+
+% Reshape input into a row vector, keeping original shape for later
+% converting results into original shape
+pdims = size(p);
+p = reshape(p, 1, np);
 
 % Method 'hommel' is equivalent to 'hochberg' of np == 2
 if (np == 2) &&  strcmp(method, 'hommel')
@@ -151,7 +156,10 @@ else
     error('Unknown p-value adjustment method');
     
 end;
-    
+
+% Reshape result vector to original form
+pc = reshape(pc, pdims);
+
 % Can't have p-values larger than one
 pc(pc > 1) = 1;    
     
