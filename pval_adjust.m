@@ -54,14 +54,13 @@ elseif strcmp(method, 'holm')
     
     % Sort p-values from smallest to largest
     [pc, pidx] = sort(p);
+    [~, ipidx] = sort(pidx);
     
     % Adjust p-values
-    for i = 1:np
-        pc(i) = pc(i) * (np - i + 1);
-    end;
+    pc = min(1, cmax((np - (1:np) + 1) .* pc));
     
     % Put p-values back in original positions
-    pc(pidx) = pc;
+    pc = pc(ipidx);
 
 elseif strcmp(method, 'hochberg')
 
@@ -177,7 +176,16 @@ pc(pc > 1) = 1;
 
 % Reshape result vector to original form
 pc = reshape(pc, pdims);
-    
+
+% Helper function to determine the cumulative maximum
+function p = cmax(p)
+
+for i = 2:numel(p)
+    if p(i) < p(i - 1)
+        p(i) = p(i - 1);
+    end;
+end;
+
 % Helper function to determine the cumulative minimum
 function p = cmin(p)
 
